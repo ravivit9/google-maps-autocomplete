@@ -423,6 +423,7 @@ import {FormControl, Validators} from &#x27;@angular/forms&#x27;;
 import {MatValidateAddressDirective} from &#x27;../directives/address-validator/mat-address-validator.directive&#x27;;
 import {MapsAPILoader} from &#x27;@agm/core&#x27;;
 import PlaceResult &#x3D; google.maps.places.PlaceResult;
+import AutocompleteOptions &#x3D; google.maps.places.AutocompleteOptions;
 
 export interface Location {
   latitude: number,
@@ -443,16 +444,29 @@ export class MatGoogleMapsAutocompleteComponent implements OnInit {
   address: PlaceResult | string;
 
   @Input()
-  country &#x3D; &#x27;de&#x27;;
+  country: string | string[];
 
   @Input()
-  types: string[] &#x3D; [&#x27;address&#x27;];
+  placeIdOnly?: boolean;
+
+  @Input()
+  strictBounds?: boolean;
+
+  @Input()
+  types?: string[];
+  // types: string[] &#x3D; [&#x27;address&#x27;];
+
+  @Input()
+  type?: string;
+
+  @Input()
+  autoCompleteOptions: AutocompleteOptions &#x3D; {};
 
   @Output()
   onChange: EventEmitter&lt;PlaceResult | string | null&gt; &#x3D; new EventEmitter&lt;PlaceResult | string | null&gt;();
 
   @Output()
-  onAddressSelected: EventEmitter&lt;PlaceResult&gt; &#x3D; new EventEmitter&lt;PlaceResult&gt;();
+  onAutocompleteSelected: EventEmitter&lt;PlaceResult&gt; &#x3D; new EventEmitter&lt;PlaceResult&gt;();
 
   @Output()
   onLocationSelected: EventEmitter&lt;Location&gt; &#x3D; new EventEmitter&lt;Location&gt;();
@@ -473,9 +487,15 @@ export class MatGoogleMapsAutocompleteComponent implements OnInit {
     this.addressValidator.subscribe(this.onNewPlaceResult);
 
     const options &#x3D; {
-      types: [&#x27;address&#x27;],
-      componentRestrictions: {country: &#x27;de&#x27;}
+      // types: [&#x27;address&#x27;],
+      componentRestrictions: {country: this.country},
+      placeIdOnly: this.placeIdOnly,
+      strictBounds: this.strictBounds,
+      types: this.types,
+      type: this.type
     };
+
+    this.autoCompleteOptions &#x3D; Object.assign(this.autoCompleteOptions, options);
 
     this._mapsAPILoader
       .load()
@@ -497,7 +517,7 @@ export class MatGoogleMapsAutocompleteComponent implements OnInit {
         //     }
         //   });
         // }
-        const autocomplete &#x3D; new google.maps.places.Autocomplete(this.searchElementRef.nativeElement, options);
+        const autocomplete &#x3D; new google.maps.places.Autocomplete(this.searchElementRef.nativeElement, this.autoCompleteOptions);
         autocomplete.addListener(&#x27;place_changed&#x27;, () &#x3D;&gt; {
           this._ngZone.run(() &#x3D;&gt; {
             // get the place result
@@ -511,7 +531,7 @@ export class MatGoogleMapsAutocompleteComponent implements OnInit {
               // emit failed event
             }
             this.address &#x3D; place.formatted_address;
-            this.onAddressSelected.emit(place);
+            this.onAutocompleteSelected.emit(place);
             this.onLocationSelected.emit(
               {
                 latitude: place.geometry.location.lat(),
