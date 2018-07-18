@@ -480,6 +480,18 @@ export class MatGoogleMapsAutocompleteComponent implements OnInit {
   public searchElementRef: ElementRef;
 
   @Input()
+  addressLabelText &#x3D; &#x27;Address&#x27;;
+
+  @Input()
+  placeholderText &#x3D; &#x27;Please enter the address&#x27;;
+
+  @Input()
+  requiredErrorText &#x3D; &#x27;The address is required&#x27;;
+
+  @Input()
+  invalidErrorText &#x3D; &#x27;The address is not valid&#x27;;
+
+  @Input()
   appearance: string | Appearance &#x3D; Appearance.STANDARD;
 
   @Input()
